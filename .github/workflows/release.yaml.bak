@@ -1,0 +1,46 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: main
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.13.3
+
+      - name: Install additional Helm repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+
+      - name: Retrieve GH app token
+        id: generate-github-app-token
+        uses: getsentry/action-github-app-token@v2
+        with:
+          app_id: ${{ secrets.CHART_UPDATER_APP_ID }}
+          private_key: ${{ secrets.CHART_UPDATER_APP_KEY }}
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        env:
+          CR_TOKEN: ${{ steps.generate-github-app-token.outputs.token }}
+          CR_SKIP_EXISTING: true
+        with:
+          charts_dir: charts
