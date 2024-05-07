@@ -1,0 +1,140 @@
+apiVersion: v1
+entries:
+  bridges-common-relay:
+  - apiVersion: v2
+    created: "2024-05-07T10:22:14.567606408Z"
+    description: A Helm chart for bridges-common-relay
+    digest: b2ad7c2dda4b89d8d7ba08565b8dd4ddff04a1153951ae1059f4f9941bf352e3
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: bridges-common-relay
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/bridges-common-relay-1.1.1/bridges-common-relay-1.1.1.tgz
+    version: 1.1.1
+  common:
+  - apiVersion: v2
+    created: "2024-05-07T10:22:14.699273654Z"
+    description: A generic helm chart for Kubernetes
+    digest: 9cf46c4c0c3ad08c76d85ec79465dd792f6d2bf62491269f261fb0a329839f3e
+    maintainers:
+    - name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: common
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/common-0.7.2/common-0.7.2.tgz
+    version: 0.7.2
+  node:
+  - apiVersion: v2
+    created: "2024-05-07T10:22:14.821713412Z"
+    description: A Helm chart to deploy Substrate/Polkadot nodes
+    digest: b8fafaa6c5a3179b63c275bedaa28bee60e0523295fbdecc06b66b064f8329fc
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: node
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/node-5.7.1/node-5.7.1.tgz
+    version: 5.7.1
+  polkadot-basic-notification:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-05-07T10:22:14.996624674Z"
+    description: A Helm chart for Kubernetes
+    digest: 3fff656ac61eaaf17cae8e7513df59047dfd22204a67620ece95f0d9385afdd8
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: polkadot-basic-notification
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/polkadot-basic-notification-1.0.4/polkadot-basic-notification-1.0.4.tgz
+    version: 1.0.4
+  polkadot-introspector:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-05-07T10:22:15.192776311Z"
+    description: A Helm chart to deploy polkadot-introspector
+    digest: 4770b2bc8e9fe70260826bd09cacac3db5ce304a032835627890df9930fca6f7
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: polkadot-introspector
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/polkadot-introspector-0.5.2/polkadot-introspector-0.5.2.tgz
+    version: 0.5.2
+  staking-miner:
+  - apiVersion: v2
+    created: "2024-05-07T10:22:15.313846693Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 1.14.1
+    description: A Helm chart to deploy staking miner (https://github.com/paritytech/staking-miner)
+    digest: e13513f7c5b0170cb96280c531cf214837ab11292ef0b31d74c13767dd0f982b
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: staking-miner
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/staking-miner-2.0.1/staking-miner-2.0.1.tgz
+    version: 2.0.1
+  substrate-faucet:
+  - apiVersion: v2
+    created: "2024-05-07T10:22:15.462895761Z"
+    dependencies:
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.8.3
+    description: A Helm chart to deploy substrate-faucet
+    digest: 7a0b2bed3af18aed739b5f68a04d206837b7e8b468d3bb5df795553a3e2b37a7
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: substrate-faucet
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/substrate-faucet-3.0.3/substrate-faucet-3.0.3.tgz
+    version: 3.0.3
+  substrate-telemetry:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-05-07T10:22:15.587670587Z"
+    description: A Helm chart for substrate-telemetry
+    digest: a5f41dfe57463434190ea44264f8e382830085c0313811f3fececfc74c1f4420
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: substrate-telemetry
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/substrate-telemetry-2.3.2/substrate-telemetry-2.3.2.tgz
+    version: 2.3.2
+  testnet-manager:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-05-07T10:22:15.738715457Z"
+    description: A Helm chart to deploy testnet-manager
+    digest: 6679e7d123d3ddf01fdcd511332098310b275c7e561bbb52f28123ff3fdd5daa
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: testnet-manager
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/testnet-manager-1.3.2/testnet-manager-1.3.2.tgz
+    version: 1.3.2
+generated: "2024-05-07T10:22:15.738725085Z"
