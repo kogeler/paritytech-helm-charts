@@ -20,6 +20,18 @@ This is intended behaviour. Make sure to run `git add -A` once again to stage ch
 
 {{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
 
+## Overview
+The Polkadot Helm Chart provides a convenient way to deploy and manage a Polkadot blockchain node in a Kubernetes cluster.
+This chart is designed to be highly configurable, supporting various configurations and features of the Polkadot node,
+including persistent storage, resource management, and custom networking.
+
+**Features:**
+- Compatible with all Substrate-based relaychains, including Polkadot, Kusama, Paseo, Westend, Rococo, and more.
+- Compatible with all Substrate-based parachains, including Asset-hub, Bridge-hub, Coretime, People, Acala, Astar, Moonbase, and others.
+- Deploy RPC, collators, validators, or full nodes in a Kubernetes cluster.
+- Use snapshots to speed up the deployment process.
+- Supports session key and node-key (ID) injection.
+
 {{ template "chart.maintainersSection" . }}
 
 ## Installing the chart
@@ -105,6 +117,51 @@ node:
       vaultPath: kv/secret/polkadot-node
       vaultKey: nodekey
 ```
+
+
+### Setting Up Node Key for Bootnodes and Validators
+
+For both bootnodes and validators (refer to [paritytech/polkadot-sdk#3852](https://github.com/paritytech/polkadot-sdk/pull/3852)), it is necessary to set up a network key.
+
+#### Steps to Set Up a Node Key
+
+1. **Generate a Custom Node Key**
+
+   You can generate a custom node key using the following command:
+   ```sh
+   polkadot key generate-node-key
+   ```
+
+2. **Add the Generated Node Key**
+
+   To add the generated node key, use the following configuration:
+
+   ```yaml
+   node:
+     customNodeKey: "<your-generated-node-key>"
+   ```
+
+3. **Point to an Existing Node Key K8s Secret**
+
+   If you have an existing Kubernetes secret for the node key, point to it using:
+
+   ```yaml
+   node:
+     existingSecrets:
+       nodeKey: "<your-existing-node-key-secret>"
+   ```
+4. **Retrieve Node Key from vault**
+
+   see [Optional Vault Integration](#optional-vault-integration)
+
+5. **Automatically Generate and Persist Node Key**
+
+   Alternatively, you can set the following to automatically generate a node key on startup and store it to the volume:
+
+   ```yaml
+   node:
+     persistGeneratedNodeKey: true
+   ```
 
 ## Upgrade
 ### From v5.5.x to v5.5.2

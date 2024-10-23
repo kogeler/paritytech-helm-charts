@@ -135,7 +135,9 @@ ingress:
   annotations: {}
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
-  # -- Ingress rules configuration
+  # -- hostname used for default rpc ingress rule, if .Values.ingress.rules is set host is not used.
+  host: chart-example.local
+  # -- Ingress rules configuration, empty = default rpc rule (send all requests to rps port)
   rules: []
   #  - host: chart-example.local
   #    paths:
@@ -152,7 +154,7 @@ ingress:
 # ref: https://docs.substrate.io/tutorials/v3/private-network/
 node:
   # -- Name of the chain
-  chain: "polkadot"
+  chain: ""
   # -- Command to run within the container
   command: "polkadot"
   # -- Number of replicas to deploy
@@ -193,6 +195,12 @@ node:
     chainPath:
     # -- Storage class to use for persistent volume
     storageClass: ""
+    # -- Mount chain-data volume using an ephemeral volume
+    # ref: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#types-of-ephemeral-volumes
+    ephemeral:
+      enabled: false
+      # -- Type supports emptyDir, generic
+      type: emptyDir
     # -- Size of the volume for chain data
     volumeSize: 100Gi
     # -- Annotations to add to the volumeClaimTemplates
@@ -291,6 +299,12 @@ node:
       chainPath: ""
       # -- Storage class to use for persistent volume
       storageClass: ""
+      # -- Mount relaychain-data volume using an ephemeral volume
+      # ref: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#types-of-ephemeral-volumes
+      ephemeral:
+        enabled: false
+        # -- Type supports emptyDir, generic
+        type: emptyDir
       # -- Size of the volume
       volumeSize: 100Gi
       # -- Annotations to add to the volumeClaimTemplates
@@ -350,7 +364,7 @@ node:
 
   # -- Keys to use by the node.
   # ref: https://wiki.polkadot.network/docs/learn-keys
-  keys: {}
+  keys: []
   # - type: "gran"
   #   scheme: "ed25519"
   #   seed: "//Alice//gran"
@@ -363,14 +377,21 @@ node:
   existingSecrets:
     # -- List of kubernetes secret names to be added to the keystore.
     # Each secret should contain 3 keys: type, scheme and seed
+    # Secret example: templates/keys.yaml
     # Supercedes node.vault.keys
     keys: []
+    # Add a derivation suffix for the private key.
+    extraDerivation: ""
 
     # -- K8s secret with node key
+    # Secret example: templates/customNodeKeySecret.yaml
     # Supercedes node.vault.nodeKey
     nodeKey: {}
       # secretName: existing-node-secret
       # secretKey: my-node-key
+      # # Append pod index to secret key (e.g., my-node-key -> my-node-key-0)
+      # # Set `appendPodIndex` to true if you want to enable appending the pod index
+      # appendPodIndex: false
 
   # -- Component to inject secrets via annotation of Hashicorp Vault
   # ref: https://www.vaultproject.io/docs/platform/k8s/injector/annotations
@@ -492,6 +513,8 @@ node:
       externalTrafficPolicy: Cluster
       # -- Service type
       type: NodePort # or ClusterIP or LoadBalancer
+      # -- Publish the P2P port even if the pod is not ready (e.g., node is syncing). It's recommended to keep this to true.
+      publishUnreadyAddresses: true
       # -- Port of the P2P endpoint (relay chain)
       port: 30333
       # -- Annotations to add to the Service
@@ -522,6 +545,8 @@ node:
       externalTrafficPolicy: Cluster
       # -- Service type
       type: NodePort # or ClusterIP, LoadBalancer
+      # -- Publish the P2P port even if the pod is not ready (e.g., node is syncing). It's recommended to keep this to true.
+      publishUnreadyAddresses: true
       # -- Port of the P2P endpoint (parachain)
       port: 30334
       # -- Annotations to add to the Service

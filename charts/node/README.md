@@ -18,7 +18,19 @@ This is intended behaviour. Make sure to run `git add -A` once again to stage ch
 
 # Substrate/Polkadot node Helm chart
 
-![Version: 5.7.1](https://img.shields.io/badge/Version-5.7.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 5.13.2](https://img.shields.io/badge/Version-5.13.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+
+## Overview
+The Polkadot Helm Chart provides a convenient way to deploy and manage a Polkadot blockchain node in a Kubernetes cluster.
+This chart is designed to be highly configurable, supporting various configurations and features of the Polkadot node,
+including persistent storage, resource management, and custom networking.
+
+**Features:**
+- Compatible with all Substrate-based relaychains, including Polkadot, Kusama, Paseo, Westend, Rococo, and more.
+- Compatible with all Substrate-based parachains, including Asset-hub, Bridge-hub, Coretime, People, Acala, Astar, Moonbase, and others.
+- Deploy RPC, collators, validators, or full nodes in a Kubernetes cluster.
+- Use snapshots to speed up the deployment process.
+- Supports session key and node-key (ID) injection.
 
 ## Maintainers
 
@@ -109,6 +121,50 @@ node:
       vaultPath: kv/secret/polkadot-node
       vaultKey: nodekey
 ```
+
+### Setting Up Node Key for Bootnodes and Validators
+
+For both bootnodes and validators (refer to [paritytech/polkadot-sdk#3852](https://github.com/paritytech/polkadot-sdk/pull/3852)), it is necessary to set up a network key.
+
+#### Steps to Set Up a Node Key
+
+1. **Generate a Custom Node Key**
+
+   You can generate a custom node key using the following command:
+   ```sh
+   polkadot key generate-node-key
+   ```
+
+2. **Add the Generated Node Key**
+
+   To add the generated node key, use the following configuration:
+
+   ```yaml
+   node:
+     customNodeKey: "<your-generated-node-key>"
+   ```
+
+3. **Point to an Existing Node Key K8s Secret**
+
+   If you have an existing Kubernetes secret for the node key, point to it using:
+
+   ```yaml
+   node:
+     existingSecrets:
+       nodeKey: "<your-existing-node-key-secret>"
+   ```
+4. **Retrieve Node Key from vault**
+
+   see [Optional Vault Integration](#optional-vault-integration)
+
+5. **Automatically Generate and Persist Node Key**
+
+   Alternatively, you can set the following to automatically generate a node key on startup and store it to the volume:
+
+   ```yaml
+   node:
+     persistGeneratedNodeKey: true
+   ```
 
 ## Upgrade
 ### From v5.5.x to v5.5.2
@@ -258,10 +314,11 @@ If you're running a collator node:
 | image.repository | string | `"parity/polkadot"` | Image repository |
 | image.tag | string | `"latest"` | Image tag |
 | imagePullSecrets | list | `[]` | Reference to one or more secrets to be used when pulling images. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ |
-| ingress | object | `{"annotations":{},"enabled":false,"rules":[],"tls":[]}` | Creates an ingress resource |
+| ingress | object | `{"annotations":{},"enabled":false,"host":"chart-example.local","rules":[],"tls":[]}` | Creates an ingress resource |
 | ingress.annotations | object | `{}` | Annotations to add to the Ingress |
 | ingress.enabled | bool | `false` | Enable creation of Ingress |
-| ingress.rules | list | `[]` | Ingress rules configuration |
+| ingress.host | string | `"chart-example.local"` | hostname used for default rpc ingress rule, if .Values.ingress.rules is set host is not used. |
+| ingress.rules | list | `[]` | Ingress rules configuration, empty = default rpc rule (send all requests to rps port) |
 | ingress.tls | list | `[]` | Ingress TLS configuration |
 | initContainers | object | `{"downloadChainSnapshot":{"cmdArgs":"","debug":false,"extraEnvVars":[],"image":{"repository":"docker.io/rclone/rclone","tag":"latest"},"resources":{}},"downloadChainspec":{"debug":false,"image":{"repository":"docker.io/alpine","tag":"latest"},"resources":{}},"downloadRuntime":{"debug":false,"image":{"repository":"paritytech/kubetools-kubectl","tag":"latest"},"resources":{}},"injectKeys":{"debug":false,"resources":{}},"persistGeneratedNodeKey":{"debug":false,"resources":{}},"retrieveServiceInfo":{"debug":false,"image":{"repository":"paritytech/kubetools-kubectl","tag":"latest"},"resources":{}}}` | Additional init containers |
 | initContainers.downloadChainSnapshot.cmdArgs | string | `""` | Flags to add to the CLI command. We rely on rclone for downloading snapshots so make sure the flags are compatible. |
@@ -298,9 +355,9 @@ If you're running a collator node:
 | jaegerAgent.ports.samplingPort | HTTP | `5778` | serve configs, sampling strategies |
 | jaegerAgent.resources | object | `{}` | Resource limits & requests |
 | nameOverride | string | `""` | Provide a name in place of node for `app:` labels |
-| node | object | `{"allowUnsafeRpcMethods":false,"chain":"polkadot","chainData":{"annotations":{},"chainPath":null,"chainSnapshot":{"enabled":false,"filelistName":"files.txt","method":"gcs","url":""},"database":"rocksdb","kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"pruning":1000,"storageClass":"","volumeSize":"100Gi"},"chainKeystore":{"accessModes":["ReadWriteOnce"],"annotations":{},"kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"mountInMemory":{"enabled":false,"sizeLimit":null},"storageClass":"","volumeSize":"10Mi"},"collatorExternalRelayChain":{"enabled":false,"relayChainRpcUrls":[]},"collatorLightClient":{"enabled":false,"relayChain":"","relayChainCustomChainspec":false,"relayChainCustomChainspecPath":"/chain-data/relay_chain_chainspec.json","relayChainCustomChainspecUrl":null},"collatorRelayChain":{"chain":"polkadot","chainData":{"annotations":{},"chainPath":"","chainSnapshot":{"enabled":false,"filelistName":"files.txt","method":"gcs","url":""},"database":"rocksdb","kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"pruning":1000,"storageClass":"","volumeSize":"100Gi"},"chainKeystore":{"accessModes":["ReadWriteOnce"],"annotations":{},"kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"mountInMemory":{"enabled":false,"sizeLimit":null},"storageClass":"","volumeSize":"10Mi"},"customChainspec":false,"customChainspecPath":"/relaychain-data/relay_chain_chainspec.json","customChainspecUrl":null,"flags":[],"prometheus":{"enabled":false,"port":9625}},"command":"polkadot","customChainspec":false,"customChainspecPath":"/chain-data/chainspec.json","customChainspecUrl":null,"customNodeKey":[],"enableOffchainIndexing":false,"enableSidecarLivenessProbe":false,"enableSidecarReadinessProbe":false,"enableStartupProbe":true,"existingSecrets":{"keys":[],"nodeKey":{}},"extraConfigmapMounts":[],"extraEnvVars":[],"extraSecretMounts":[],"flags":[],"forceDownloadChainspec":false,"isParachain":false,"keys":{},"legacyRpcFlags":false,"logLevels":[],"perNodeServices":{"apiService":{"annotations":{},"enabled":true,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"httpPort":9933,"prometheusPort":9615,"relayChainPrometheusPort":9625,"rpcPort":9944,"type":"ClusterIP","wsPort":9955},"paraP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30334,"type":"NodePort","ws":{"enabled":false,"port":30335}},"relayP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30333,"type":"NodePort","ws":{"enabled":false,"port":30334}},"setPublicAddressToExternalIp":{"autodiscoveryFix":false,"enabled":false,"ipRetrievalServiceUrl":"https://ifconfig.io"}},"persistGeneratedNodeKey":false,"persistentVolumeClaimRetentionPolicy":null,"podManagementPolicy":null,"prometheus":{"enabled":true,"port":9615},"replicas":1,"resources":{},"role":"full","serviceAnnotations":{},"serviceExtraPorts":[],"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"namespace":null,"relabelings":[],"scrapeTimeout":"10s","targetLabels":["node"]},"startupProbeFailureThreshold":30,"substrateApiSidecar":{"enabled":false},"telemetryUrls":[],"tracing":{"enabled":false},"updateStrategy":{"enabled":false,"maxUnavailable":1,"type":"RollingUpdate"},"vault":{"authConfigServiceAccount":null,"authConfigType":null,"authPath":null,"authRole":null,"authType":null,"keys":{},"nodeKey":{}},"wasmRuntimeOverridesPath":"/chain-data/runtimes","wasmRuntimeUrl":""}` | Deploy a substrate node. ref: https://docs.substrate.io/tutorials/v3/private-network/ |
+| node | object | `{"allowUnsafeRpcMethods":false,"chain":"","chainData":{"annotations":{},"chainPath":null,"chainSnapshot":{"enabled":false,"filelistName":"files.txt","method":"gcs","url":""},"database":"rocksdb","ephemeral":{"enabled":false,"type":"emptyDir"},"kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"pruning":1000,"storageClass":"","volumeSize":"100Gi"},"chainKeystore":{"accessModes":["ReadWriteOnce"],"annotations":{},"kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"mountInMemory":{"enabled":false,"sizeLimit":null},"storageClass":"","volumeSize":"10Mi"},"collatorExternalRelayChain":{"enabled":false,"relayChainRpcUrls":[]},"collatorLightClient":{"enabled":false,"relayChain":"","relayChainCustomChainspec":false,"relayChainCustomChainspecPath":"/chain-data/relay_chain_chainspec.json","relayChainCustomChainspecUrl":null},"collatorRelayChain":{"chain":"polkadot","chainData":{"annotations":{},"chainPath":"","chainSnapshot":{"enabled":false,"filelistName":"files.txt","method":"gcs","url":""},"database":"rocksdb","ephemeral":{"enabled":false,"type":"emptyDir"},"kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"pruning":1000,"storageClass":"","volumeSize":"100Gi"},"chainKeystore":{"accessModes":["ReadWriteOnce"],"annotations":{},"kubernetesVolumeSnapshot":null,"kubernetesVolumeToClone":null,"mountInMemory":{"enabled":false,"sizeLimit":null},"storageClass":"","volumeSize":"10Mi"},"customChainspec":false,"customChainspecPath":"/relaychain-data/relay_chain_chainspec.json","customChainspecUrl":null,"flags":[],"prometheus":{"enabled":false,"port":9625}},"command":"polkadot","customChainspec":false,"customChainspecPath":"/chain-data/chainspec.json","customChainspecUrl":null,"customNodeKey":[],"enableOffchainIndexing":false,"enableSidecarLivenessProbe":false,"enableSidecarReadinessProbe":false,"enableStartupProbe":true,"existingSecrets":{"extraDerivation":"","keys":[],"nodeKey":{}},"extraConfigmapMounts":[],"extraEnvVars":[],"extraSecretMounts":[],"flags":[],"forceDownloadChainspec":false,"isParachain":false,"keys":[],"legacyRpcFlags":false,"logLevels":[],"perNodeServices":{"apiService":{"annotations":{},"enabled":true,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"httpPort":9933,"prometheusPort":9615,"relayChainPrometheusPort":9625,"rpcPort":9944,"type":"ClusterIP","wsPort":9955},"paraP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30334,"publishUnreadyAddresses":true,"type":"NodePort","ws":{"enabled":false,"port":30335}},"relayP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30333,"publishUnreadyAddresses":true,"type":"NodePort","ws":{"enabled":false,"port":30334}},"setPublicAddressToExternalIp":{"autodiscoveryFix":false,"enabled":false,"ipRetrievalServiceUrl":"https://ifconfig.io"}},"persistGeneratedNodeKey":false,"persistentVolumeClaimRetentionPolicy":null,"podManagementPolicy":null,"prometheus":{"enabled":true,"port":9615},"replicas":1,"resources":{},"role":"full","serviceAnnotations":{},"serviceExtraPorts":[],"serviceMonitor":{"enabled":false,"interval":"30s","metricRelabelings":[],"namespace":null,"relabelings":[],"scrapeTimeout":"10s","targetLabels":["node"]},"startupProbeFailureThreshold":30,"substrateApiSidecar":{"enabled":false},"telemetryUrls":[],"tracing":{"enabled":false},"updateStrategy":{"enabled":false,"maxUnavailable":1,"type":"RollingUpdate"},"vault":{"authConfigServiceAccount":null,"authConfigType":null,"authPath":null,"authRole":null,"authType":null,"keys":{},"nodeKey":{}},"wasmRuntimeOverridesPath":"/chain-data/runtimes","wasmRuntimeUrl":""}` | Deploy a substrate node. ref: https://docs.substrate.io/tutorials/v3/private-network/ |
 | node.allowUnsafeRpcMethods | bool | `false` | Allow executing unsafe RPC methods |
-| node.chain | string | `"polkadot"` | Name of the chain |
+| node.chain | string | `""` | Name of the chain |
 | node.chainData.annotations | object | `{}` | Annotations to add to the volumeClaimTemplates |
 | node.chainData.chainPath | string | `nil` | Path on the volume to store chain data |
 | node.chainData.chainSnapshot | object | `{"enabled":false,"filelistName":"files.txt","method":"gcs","url":""}` | Configure parameters for restoring chain snapshot. Uses [rclone](https://rclone.org/) |
@@ -309,6 +366,8 @@ If you're running a collator node:
 | node.chainData.chainSnapshot.method | string | `"gcs"` | Restoration method. One of: gcs, s3, http-single-tar, http-single-tar-lz4, http-filelist |
 | node.chainData.chainSnapshot.url | string | `""` | A URL to download chain backup |
 | node.chainData.database | string | `"rocksdb"` | Database backend engine to use |
+| node.chainData.ephemeral | object | `{"enabled":false,"type":"emptyDir"}` | Mount chain-data volume using an ephemeral volume ref: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#types-of-ephemeral-volumes |
+| node.chainData.ephemeral.type | string | `"emptyDir"` | Type supports emptyDir, generic |
 | node.chainData.kubernetesVolumeSnapshot | string | `nil` | If set, create a clone of the volume (using volumeClaimTemplates.dataSource.VolumeSnapshot) and use it to store chain data |
 | node.chainData.kubernetesVolumeToClone | string | `nil` | If set, create a clone of the volume (using volumeClaimTemplates.dataSource.PersistentVolumeClaim) and use it to store chain data |
 | node.chainData.pruning | int | `1000` | Set the amount of blocks to retain. If set to 0 archive node will be run. If deprecated `--pruning` flags is used in `node.flags`, set this to `false`. |
@@ -342,6 +401,8 @@ If you're running a collator node:
 | node.collatorRelayChain.chainData.chainSnapshot.method | string | `"gcs"` | Restoration method. One of: gcs, s3, http-single-tar, http-single-tar-lz4, http-filelist |
 | node.collatorRelayChain.chainData.chainSnapshot.url | string | `""` | A URL to download chain backup |
 | node.collatorRelayChain.chainData.database | string | `"rocksdb"` | Database backend engine to use for the collator relay-chain database |
+| node.collatorRelayChain.chainData.ephemeral | object | `{"enabled":false,"type":"emptyDir"}` | Mount relaychain-data volume using an ephemeral volume ref: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#types-of-ephemeral-volumes |
+| node.collatorRelayChain.chainData.ephemeral.type | string | `"emptyDir"` | Type supports emptyDir, generic |
 | node.collatorRelayChain.chainData.kubernetesVolumeSnapshot | string | `nil` | If set, create a clone of the volume (using volumeClaimTemplates.dataSource.VolumeSnapshot) and use it to store relay-chain data |
 | node.collatorRelayChain.chainData.kubernetesVolumeToClone | string | `nil` | If set, create a clone of the volume (using volumeClaimTemplates.dataSource.PersistentVolumeClaim) and use it to store relay-chain data |
 | node.collatorRelayChain.chainData.pruning | int | `1000` | Set the amount of blocks to retain for the collator relay-chain database. If set to 0 archive node will be run. If deprecated `--pruning` flags is used in `node.collatorRelayChain.flags`, set this to `false`. |
@@ -372,19 +433,19 @@ If you're running a collator node:
 | node.enableSidecarLivenessProbe | bool | `false` | Enable Node liveness probe through `paritytech/ws-health-exporter` running as a sidecar container |
 | node.enableSidecarReadinessProbe | bool | `false` | Enable Node readiness probe through `paritytech/ws-health-exporter` running as a sidecar container |
 | node.enableStartupProbe | bool | `true` | Enable Node container's startup probe |
-| node.existingSecrets | object | `{"keys":[],"nodeKey":{}}` | Inject keys from already existing Kubernetes secrets |
-| node.existingSecrets.keys | list | `[]` | List of kubernetes secret names to be added to the keystore. Each secret should contain 3 keys: type, scheme and seed Supercedes node.vault.keys |
-| node.existingSecrets.nodeKey | object | `{}` | K8s secret with node key Supercedes node.vault.nodeKey |
+| node.existingSecrets | object | `{"extraDerivation":"","keys":[],"nodeKey":{}}` | Inject keys from already existing Kubernetes secrets |
+| node.existingSecrets.keys | list | `[]` | List of kubernetes secret names to be added to the keystore. Each secret should contain 3 keys: type, scheme and seed Secret example: templates/keys.yaml Supercedes node.vault.keys |
+| node.existingSecrets.nodeKey | object | `{}` | K8s secret with node key Secret example: templates/customNodeKeySecret.yaml Supercedes node.vault.nodeKey |
 | node.extraConfigmapMounts | list | `[]` | Mount already existing ConfigMaps into the main container. https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#populate-a-volume-with-data-stored-in-a-configmap |
 | node.extraEnvVars | list | `[]` | Environment variables to set for the main container: |
 | node.extraSecretMounts | list | `[]` | Mount already existing k8s Secrets into main container. https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod NOTE: This is NOT used to inject keys to the keystore or add node key. |
 | node.flags | list | `[]` | Flags to add to the Polkadot binary |
 | node.forceDownloadChainspec | bool | `false` | Replace chain spec if it already exists |
 | node.isParachain | bool | `false` | Deploy a collator node. ref: https://wiki.polkadot.network/docs/learn-collator If Collator is enabled, collator image must be used |
-| node.keys | object | `{}` | Keys to use by the node. ref: https://wiki.polkadot.network/docs/learn-keys |
+| node.keys | list | `[]` | Keys to use by the node. ref: https://wiki.polkadot.network/docs/learn-keys |
 | node.legacyRpcFlags | bool | `false` | Use deprecated ws/rpc flags. ref: https://github.com/paritytech/substrate/pull/13384 |
 | node.logLevels | list | `[]` | Log level |
-| node.perNodeServices | object | `{"apiService":{"annotations":{},"enabled":true,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"httpPort":9933,"prometheusPort":9615,"relayChainPrometheusPort":9625,"rpcPort":9944,"type":"ClusterIP","wsPort":9955},"paraP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30334,"type":"NodePort","ws":{"enabled":false,"port":30335}},"relayP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30333,"type":"NodePort","ws":{"enabled":false,"port":30334}},"setPublicAddressToExternalIp":{"autodiscoveryFix":false,"enabled":false,"ipRetrievalServiceUrl":"https://ifconfig.io"}}` | Configuration of individual services of the node |
+| node.perNodeServices | object | `{"apiService":{"annotations":{},"enabled":true,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"httpPort":9933,"prometheusPort":9615,"relayChainPrometheusPort":9625,"rpcPort":9944,"type":"ClusterIP","wsPort":9955},"paraP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30334,"publishUnreadyAddresses":true,"type":"NodePort","ws":{"enabled":false,"port":30335}},"relayP2pService":{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30333,"publishUnreadyAddresses":true,"type":"NodePort","ws":{"enabled":false,"port":30334}},"setPublicAddressToExternalIp":{"autodiscoveryFix":false,"enabled":false,"ipRetrievalServiceUrl":"https://ifconfig.io"}}` | Configuration of individual services of the node |
 | node.perNodeServices.apiService.annotations | object | `{}` | Annotations to add to the Service |
 | node.perNodeServices.apiService.enabled | bool | `true` | If enabled, generic service to expose common node APIs |
 | node.perNodeServices.apiService.externalDns | object | `{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300}` | External DNS configuration ref: https://github.com/kubernetes-sigs/external-dns |
@@ -400,7 +461,7 @@ If you're running a collator node:
 | node.perNodeServices.apiService.rpcPort | int | `9944` | Port of the RPC endpoint |
 | node.perNodeServices.apiService.type | string | `"ClusterIP"` | Service type |
 | node.perNodeServices.apiService.wsPort | int | `9955` | deprecated, use rpcPort |
-| node.perNodeServices.paraP2pService | object | `{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30334,"type":"NodePort","ws":{"enabled":false,"port":30335}}` | If enabled, create service to expose parachain P2P |
+| node.perNodeServices.paraP2pService | object | `{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30334,"publishUnreadyAddresses":true,"type":"NodePort","ws":{"enabled":false,"port":30335}}` | If enabled, create service to expose parachain P2P |
 | node.perNodeServices.paraP2pService.annotations | object | `{}` | Annotations to add to the Service |
 | node.perNodeServices.paraP2pService.enabled | bool | `false` | Enable exposing parachain P2P Service |
 | node.perNodeServices.paraP2pService.externalDns | object | `{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300}` | External DNS configuration ref: https://github.com/kubernetes-sigs/external-dns |
@@ -411,10 +472,11 @@ If you're running a collator node:
 | node.perNodeServices.paraP2pService.externalTrafficPolicy | string | `"Cluster"` | Traffic policy |
 | node.perNodeServices.paraP2pService.extraPorts | list | `[]` | Additional ports on per node Services |
 | node.perNodeServices.paraP2pService.port | int | `30334` | Port of the P2P endpoint (parachain) |
+| node.perNodeServices.paraP2pService.publishUnreadyAddresses | bool | `true` | Publish the P2P port even if the pod is not ready (e.g., node is syncing). It's recommended to keep this to true. |
 | node.perNodeServices.paraP2pService.type | string | `"NodePort"` | Service type |
 | node.perNodeServices.paraP2pService.ws.enabled | bool | `false` | If enabled, additionally expose WebSocket port. Useful for bootnodes |
 | node.perNodeServices.paraP2pService.ws.port | int | `30335` | WS port |
-| node.perNodeServices.relayP2pService | object | `{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30333,"type":"NodePort","ws":{"enabled":false,"port":30334}}` | If enabled, create service to expose relay chain P2P |
+| node.perNodeServices.relayP2pService | object | `{"annotations":{},"enabled":false,"externalDns":{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300},"externalTrafficPolicy":"Cluster","extraPorts":[],"port":30333,"publishUnreadyAddresses":true,"type":"NodePort","ws":{"enabled":false,"port":30334}}` | If enabled, create service to expose relay chain P2P |
 | node.perNodeServices.relayP2pService.annotations | object | `{}` | Annotations to add to the Service |
 | node.perNodeServices.relayP2pService.externalDns | object | `{"customPrefix":"","enabled":false,"hostname":"example.com","ttl":300}` | External DNS configuration ref: https://github.com/kubernetes-sigs/external-dns |
 | node.perNodeServices.relayP2pService.externalDns.customPrefix | string | `""` | Custom prefix to use instead of prefixing the hostname with the name of the Pod |
@@ -424,6 +486,7 @@ If you're running a collator node:
 | node.perNodeServices.relayP2pService.externalTrafficPolicy | string | `"Cluster"` | Traffic policy |
 | node.perNodeServices.relayP2pService.extraPorts | list | `[]` | Additional ports on per node Services |
 | node.perNodeServices.relayP2pService.port | int | `30333` | Port of the P2P endpoint (relay chain) |
+| node.perNodeServices.relayP2pService.publishUnreadyAddresses | bool | `true` | Publish the P2P port even if the pod is not ready (e.g., node is syncing). It's recommended to keep this to true. |
 | node.perNodeServices.relayP2pService.type | string | `"NodePort"` | Service type |
 | node.perNodeServices.relayP2pService.ws.enabled | bool | `false` | If enabled, additionally expose WebSocket port. Useful for bootnodes |
 | node.perNodeServices.relayP2pService.ws.port | int | `30334` | WS port |

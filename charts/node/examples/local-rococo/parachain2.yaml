@@ -4,7 +4,7 @@ image:
   pullPolicy: Always
 
 node:
-  chain: asset-hub-rococo-local
+  chain: bridge-hub-rococo-local
   command: polkadot-parachain
   role: collator
   replicas: 2
@@ -13,21 +13,16 @@ node:
     storageClass: ""
   chainKeystore:
     storageClass: ""
-  keys:
-    # This is Alice seed. To generate new seed run: docker run --rm parity/polkadot:latest key generate
-    - seed: "bottom drive obey lake curtain smoke basket hold race lonely fit walk"
-      type: aura
-      scheme: sr25519
-      # ${HOSTNAME##*-} will be evaluated as the pod index, pod-0: //Alice, pod-1: //Bob
-      extraDerivation: '$([ "${HOSTNAME##*-}" = "0" ] && echo "//Alice" || echo "//Bob")'
-  customNodeKey:
-   # To generate new key run: docker run --rm -t parity/polkadot:latest key generate-node-key
-   # 12D3KooWL5Av1ZZSKkaittmxXBmZpzP7zgiB1AAnWHEw7MxzqnFp
-   - bdf71a910354e231095366230621eaefb5f99465045f1501478fd3d9b5deef98
-   # 12D3KooWAxFonTS177T81CTDeH6mfvJQWYEJeVQ1gPrnULjNY8Cn
-   - 2a775a9db9fb0ff40afacb4aa7ccbf2a5d04c6d980bb1437c196c8e38a6cd948
+  existingSecrets:
+    keys:
+      - my-key-aura
+    extraDerivation: '$([ "${HOSTNAME##*-}" = "0" ] && echo "//Alice" || echo "//Bob")'
+    nodeKey:
+     secretName: my-node-key
+     secretKey: custom-node-key
+     appendPodIndex: true
   flags:
-    - "--bootnodes /dns/parachain-node-0/tcp/30334/p2p/12D3KooWL5Av1ZZSKkaittmxXBmZpzP7zgiB1AAnWHEw7MxzqnFp"
+    - "--bootnodes /dns/parachain2-node-0/tcp/30334/p2p/12D3KooWF4B55vTeXa7g88nUdSHVk6DiRXTrsfQyJcg7TrXcCK8U"
   isParachain: true
   collatorRelayChain:
     chain: rococo-local
@@ -38,19 +33,6 @@ node:
     flags:
       - "--allow-private-ipv4"
       - "--discover-local"
-
-# RPC endpoint
-ingress:
-  enabled: false
-  annotations:
-    kubernetes.io/ingress.class: TODO
-    external-dns.alpha.kubernetes.io/target: TODO
-    cert-manager.io/cluster-issuer: TODO
-  host: parachain.example.com
-  tls:
-    - secretName: parachain.example.com
-      hosts:
-        - parachain.example.com
 
 extraInitContainers:
   - name: dump-state-and-wasm
@@ -76,3 +58,15 @@ extraInitContainers:
     volumeMounts:
       - mountPath: /chain-data
         name: chain-data
+  - name: dump-session-keys
+    resources:
+      requests:
+        memory: 8Mi
+        cpu: 0.01
+      limits:
+        memory: 32Mi
+    image: docker.io/paritytech/substrate-session-keys-grabber:a5dd354f-20240716
+    args: ["/keystore"]
+    volumeMounts:
+      - mountPath: /keystore
+        name: chain-keystore
