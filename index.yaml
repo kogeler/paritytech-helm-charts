@@ -16,6 +16,18 @@ entries:
     version: 1.1.1
   common:
   - apiVersion: v2
+    created: "2024-10-23T08:12:47.215536878Z"
+    description: A generic helm chart for Kubernetes
+    digest: 4881bfdb05fc37456bedb1bc92abe92349e51e28e4cc4a37a3f0894b5346ed17
+    maintainers:
+    - name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: common
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/common-0.8.1/common-0.8.1.tgz
+    version: 0.8.1
+  - apiVersion: v2
     created: "2024-05-07T10:22:14.699273654Z"
     description: A generic helm chart for Kubernetes
     digest: 9cf46c4c0c3ad08c76d85ec79465dd792f6d2bf62491269f261fb0a329839f3e
@@ -28,6 +40,19 @@ entries:
     - https://github.com/kogeler/paritytech-helm-charts/releases/download/common-0.7.2/common-0.7.2.tgz
     version: 0.7.2
   node:
+  - apiVersion: v2
+    created: "2024-10-23T08:12:47.312288584Z"
+    description: A Helm chart to deploy Substrate/Polkadot nodes
+    digest: 5c5ec059b0ed07fd7a1d6e03b6d308a09764cc01614d3c74284c1b33dd402c92
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: node
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/node-5.13.2/node-5.13.2.tgz
+    version: 5.13.2
   - apiVersion: v2
     created: "2024-05-07T10:22:14.821713412Z"
     description: A Helm chart to deploy Substrate/Polkadot nodes
@@ -110,6 +135,20 @@ entries:
   substrate-telemetry:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2024-10-23T08:12:47.807528165Z"
+    description: A Helm chart for substrate-telemetry
+    digest: bf88575c60be01b05569c488d17a7dad6ea20277a89e500e4911dbfdab04130d
+    maintainers:
+    - email: devops+helm@parity.io
+      name: Parity
+      url: https://github.com/paritytech/helm-charts
+    name: substrate-telemetry
+    type: application
+    urls:
+    - https://github.com/kogeler/paritytech-helm-charts/releases/download/substrate-telemetry-2.3.3/substrate-telemetry-2.3.3.tgz
+    version: 2.3.3
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2024-05-07T10:22:15.587670587Z"
     description: A Helm chart for substrate-telemetry
     digest: a5f41dfe57463434190ea44264f8e382830085c0313811f3fececfc74c1f4420
@@ -137,4 +176,4 @@ entries:
     urls:
     - https://github.com/kogeler/paritytech-helm-charts/releases/download/testnet-manager-1.3.2/testnet-manager-1.3.2.tgz
     version: 1.3.2
-generated: "2024-05-07T10:22:15.738725085Z"
+generated: "2024-10-23T08:12:47.911412963Z"
