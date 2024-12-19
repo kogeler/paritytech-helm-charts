@@ -580,10 +580,10 @@ spec:
                 {{- else if .Values.node.collatorLightClient.enabled }}
                 --relay-chain-light-client \
                 {{- end }}
-                --listen-addr=/ip4/0.0.0.0/tcp/30334 \
+                --listen-addr=/ip4/0.0.0.0/tcp/31333 \
                 {{- if .Values.node.perNodeServices.paraP2pService.enabled }}
                 {{- if .Values.node.perNodeServices.paraP2pService.ws.enabled }}
-                --listen-addr=/ip4/0.0.0.0/tcp/30335/ws \
+                --listen-addr=/ip4/0.0.0.0/tcp/31334/ws \
                 {{- end }}
                 {{- if .Values.node.perNodeServices.setPublicAddressToExternalIp.enabled }}
                 --public-addr=/ip4/${EXTERNAL_IP}/tcp/${PARA_CHAIN_P2P_PORT} \
@@ -725,10 +725,10 @@ spec:
               name: p2p-ws
             {{- end }}
             {{- if and .Values.node.isParachain .Values.node.perNodeServices.paraP2pService.enabled }}
-            - containerPort: 30334
+            - containerPort: 31333
               name: para-p2p
             {{- if .Values.node.perNodeServices.paraP2pService.ws.enabled  }}
-            - containerPort: 30335
+            - containerPort: 31334
               name: para-p2p-ws
             {{- end }}
             {{- end }}
