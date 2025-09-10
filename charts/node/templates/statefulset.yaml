@@ -4,6 +4,7 @@
 {{ $serviceAccountName :=  include "node.serviceAccountName" . }}
 {{ $databasePath := include "node.databasePath" . }}
 {{ $chartManagedFlagsRegex := include "node.chartManagedFlagsRegex" . }}
+{{ $relayInCollatorChartManagedFlagsRegex := include "node.relayInCollatorChartManagedFlagsRegex" . }}
 {{ include "validateNodeKeys" . }}
 {{ include "validateKeys" . }}
 apiVersion: apps/v1
@@ -661,7 +662,7 @@ spec:
                 --telemetry-url={{ . | squote }} \
                 {{- end }}
                 {{- range .Values.node.collatorRelayChain.flags }}
-                {{- if regexMatch $chartManagedFlagsRegex . }}
+                {{- if regexMatch $relayInCollatorChartManagedFlagsRegex . }}
                 {{- fail (printf "%s should not be set through `node.collatorRelayChain.flags` but with the appropriate chart value" .) }}
                 {{- else }}
                 {{ . }} \

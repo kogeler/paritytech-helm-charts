@@ -100,7 +100,9 @@ Define a regex matcher to check if the passed node flags are managed by the char
 {{- define "node.chartManagedFlagsRegex" -}}
 {{- "(\\W|^)(--name|--base-path|--chain|--state-pruning|--validator|--collator|--light|--database|--prometheus-external|--prometheus-port|--node-key|--wasm-runtime-overrides|--jaeger-agent|--rpc-external|--unsafe-rpc-external|--ws-external|--unsafe-ws-external|--rpc-methods|--rpc-cors|--rpc-port|--ws-port|--enable-offchain-indexing)(\\W|$)" }}
 {{- end }}
-
+{{- define "node.relayInCollatorChartManagedFlagsRegex" -}}
+{{- "(\\W|^)(--name|--base-path|--chain|--state-pruning|--validator|--collator|--light|--database|--prometheus-external|--prometheus-port|--wasm-runtime-overrides|--jaeger-agent|--rpc-external|--unsafe-rpc-external|--ws-external|--unsafe-ws-external|--rpc-methods|--rpc-cors|--rpc-port|--ws-port|--enable-offchain-indexing)(\\W|$)" }}
+{{- end }}
 
 {{/*
 Return true if we have collator with Relaychain
